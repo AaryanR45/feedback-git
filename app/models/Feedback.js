@@ -1,11 +1,16 @@
-import {model,models,Schema} from "mongoose";
+import { model, models, Schema } from "mongoose";
 
-const feedbackSchema=new Schema({
-    title:{type:String,required:true},
-    description:{type:String,required:true},
-},
-{
-    timestamps:true
-});
+const feedbackSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    image: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export const Feedback = models.Feedback || model("Feedback", feedbackSchema);
+const Feedback = models.Feedback || model("Feedback", feedbackSchema);
+
+export default Feedback;
