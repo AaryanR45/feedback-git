@@ -1,7 +1,7 @@
 import Popup from "./Popup";
 import Button from "./Button";
 import FeedbackItemPopupComments from "./FeedbackItemPopupComment";
-export default function FeedbackItemPopup({ title,setShow,description,votesCount }) {
+export default function FeedbackItemPopup({ title,setShow,description,votes }) {
   return (
 <Popup title={''} setShow={setShow}>
   <div className="p-8">
@@ -14,7 +14,7 @@ export default function FeedbackItemPopup({ title,setShow,description,votesCount
 <div className="flex justify-end px-8 py-2 border-b">
 <Button primary="true">
 <span className="triangle-up"></span>
-  Upvote {votesCount}</Button>
+  Upvote {votes}</Button>
 </div>
 <div>
   <FeedbackItemPopupComments/>
