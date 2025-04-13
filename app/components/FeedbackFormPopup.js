@@ -4,13 +4,12 @@ import axios from "axios";
 import Trash from "./icons/Trash";
 import { useState, useRef } from "react";
 
-
-export default function FeedbackFormPopup({ setShow }) {
+export default function FeedbackFormPopup({ setShow,onCreate }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePath, setImagePath] = useState("");
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleImageChange = (e) => {
     setSelectedImage(e.target.files[0]);
@@ -23,19 +22,18 @@ export default function FeedbackFormPopup({ setShow }) {
     const formData = new FormData();
     formData.append("image", selectedImage);
 
-    setIsLoading(true); // Start loading when image upload starts
+    setIsLoading(true);
 
     try {
       const response = await axios.post("/api/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setImagePath(response.data.imagePath);
-      console.log("Image uploaded successfully:", response.data.imagePath);
+      response.data.imagePath;
     } catch (error) {
-      console.error("Error uploading image:", error);
       alert("Only image file allowed.");
     } finally {
-      setIsLoading(false); // Stop loading when upload finishes
+      setIsLoading(false);
     }
   };
 
@@ -50,12 +48,11 @@ export default function FeedbackFormPopup({ setShow }) {
       const res = await axios.post("/api/feedback", {
         title,
         description,
-        image: imagePath, 
+        image: imagePath,
       });
-      console.log("Feedback saved:", res.data);
-      setShow(false); // Close the popup after submission
+      setShow(false);
+      onCreate();
     } catch (err) {
-      console.error("Error submitting feedback:", err);
       alert("Failed to upload image. Please try again.");
     }
   };
@@ -63,22 +60,18 @@ export default function FeedbackFormPopup({ setShow }) {
   const fileInputRef = useRef(null);
   const removeUpload = async (ev, link) => {
     ev.preventDefault();
-  
+
     try {
       await axios.delete("/api/upload", {
         data: { imagePath: link },
       });
-      setImagePath(""); // remove from UI
-      setSelectedImage(null); // clear file input
+      setImagePath("");
+      setSelectedImage(null);
       fileInputRef.current.value = null;
     } catch (err) {
       console.error("Failed to delete image:", err);
     }
   };
-  
-  
-  
-
   return (
     <Popup setShow={setShow} title="Make a suggestion">
       <form className="p-8" onSubmit={handleCreatePostButtonClick}>
@@ -97,9 +90,13 @@ export default function FeedbackFormPopup({ setShow }) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-
         <label className="block mt-4 mb-1">Attach image</label>
-        <input type="file" onChange={handleImageChange} className="mb-2" ref={fileInputRef} />
+        <input
+          type="file"
+          onChange={handleImageChange}
+          className="mb-2"
+          ref={fileInputRef}
+        />
         {imagePath && (
           <div className="mb-4 relative flex flex-col">
             <p className="text-sm text-gray-600">Uploaded image:</p>
@@ -110,9 +107,8 @@ export default function FeedbackFormPopup({ setShow }) {
                 className=" w-auto h-40 mt-1 rounded border border-gray-300"
               />
               <button
-              onClick={(ev) => removeUpload(ev, imagePath)}
+                onClick={(ev) => removeUpload(ev, imagePath)}
                 className="absolute -top-2 -right-2 bg-gray-200 text-black text-xs p-1  rounded-md hover:bg-red-600"
-                // onClick={handleDeleteImage} // Add your delete handler function
               >
                 <Trash />
               </button>
@@ -122,16 +118,16 @@ export default function FeedbackFormPopup({ setShow }) {
 
         <div className="flex gap-2 mt-4 justify-end">
           <button
-            type="button" // Make this button act like a regular button (not form submission)
+            type="button"
             onClick={handleImageUpload}
             className="mb-4 px-4 py-2 bg-gray-100 rounded text-sm"
-            disabled={isLoading} // Disable button while uploading
+            disabled={isLoading}
           >
             {isLoading ? "Uploading..." : "Attach files"}
           </button>
           <Button
-            primary="true"
-            type="submit" // Submit the form when clicked
+            primary
+            type="submit"
             className="mb-4 px-4 py-2 bg-blue-500 rounded text-sm"
           >
             Create post

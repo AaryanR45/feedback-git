@@ -10,7 +10,8 @@ interface Feedback {
   _id: string;
   id: string;
   title: string;
-  description?: string;
+  description: string;
+  image: string;
 }
 interface Vote {
   feedbackId: string;
@@ -26,14 +27,7 @@ export default function Board() {
   const { data: session } = useSession();
 
   useEffect(() => {
-    axios
-      .get("/api/feedback")
-      .then((res) => {
-        setFeedbacks(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching feedbacks:", error);
-      });
+  fetchFeedbacks();
   }, []);
 
   useEffect(() => {
@@ -44,14 +38,27 @@ export default function Board() {
     const feedbackId = localStorage.getItem("vote_after_login");
 
     if (session?.user?.email && feedbackId) {
-      axios.post("/api/vote", { feedbackId });
-      localStorage.removeItem("vote_after_login");
+      axios.post("/api/vote", { feedbackId }).then(() => {
+        localStorage.removeItem("vote_after_login");
+        fetchVotes();
+      });
     }
   }, [session?.user?.email]);
 
-  async function fetchVotes(){
+  async function fetchFeedbacks(){
+    axios
+    .get("/api/feedback")
+    .then((res) => {
+      setFeedbacks(res.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching feedbacks:", error);
+    });
+  }
+
+  function fetchVotes() {
     const ids = feedbacks.map((f) => f._id);
-    const res=await axios.get("/api/vote?feedbackIds=" + ids.join(",")).then((res) => {
+    axios.get("/api/vote?feedbackIds=" + ids.join(",")).then((res) => {
       setVotes(res.data);
     });
   }
@@ -62,15 +69,8 @@ export default function Board() {
   function openFeedbackPopupItem(feedback: Feedback) {
     setShowFeedbackPopupItem(feedback);
   }
-
   return (
     <main className="bg-white max-w-4xl mx-auto shadow-lg rounded-lg mt-8 overflow-hidden">
-      {session?.user ? (
-        <div>{session.user.email}</div>
-      ) : (
-        <div>not logged in</div>
-      )}
-
       <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-8">
         <h1 className="font-bold text-xl">Feedboard</h1>
         <p>
@@ -82,9 +82,10 @@ export default function Board() {
         <div className="grow">Filters</div>
         <div>
           <Button
-            primary={true}
+            primary
             disabled={false}
             onClick={openFeedbackPopupForm}
+            className={undefined}
           >
             Make a suggestion
           </Button>
@@ -96,24 +97,36 @@ export default function Board() {
           <Feedbackitem
             key={feedback._id}
             _id={feedback._id}
-            votes={votes.filter(v => v.feedbackId.toString() === feedback._id.toString())}
+            votes={votes.filter(
+              (v) => v.feedbackId.toString() === feedback._id.toString()
+            )}
             onOpen={() => openFeedbackPopupItem(feedback)}
             title={feedback.title}
             description={feedback.description || "No description available"}
-            feedbackId={feedback._id} onVotesChange={fetchVotes}         />
+            feedbackId={feedback._id}
+            onVotesChange={fetchVotes}
+          />
         ))}
       </div>
 
       {showFeedbackPopupForm && (
-        <FeedbackFormPopup setShow={setShowFeedbackPopupForm} />
+        <FeedbackFormPopup onCreate={fetchFeedbacks} setShow={setShowFeedbackPopupForm} />
       )}
 
       {showFeedbackPopupItem && (
         <FeedbackItemPopup
-          votes={undefined} key={showFeedbackPopupItem.id}
+          key={showFeedbackPopupItem.id}
           {...showFeedbackPopupItem}
+          votes={votes.filter(
+            (v) => v.feedbackId.toString() === showFeedbackPopupItem._id
+          )}
           setShow={setShowFeedbackPopupItem}
-          description={showFeedbackPopupItem.description || "No description available"}        />
+          onVotesChange={fetchVotes}
+          description={
+            showFeedbackPopupItem.description || "No description available"
+          }
+          image={showFeedbackPopupItem.image}
+        />
       )}
     </main>
   );

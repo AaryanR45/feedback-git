@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState } from "react";
 import Popup from "./Popup";
 import Button from "./Button";
@@ -11,12 +11,11 @@ export default function Feedbackitem({
   title,
   description,
   votes,
-  onVotesChange,
   feedbackId,
+  onVotesChange,
 }) {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const { data: session } = useSession();
-  const[isVotesLoading,setIsVotesLoading]=useState(false);
 
   async function handleVoteButtonClick(ev) {
     ev.stopPropagation();
@@ -27,12 +26,9 @@ export default function Feedbackitem({
       setShowLoginPopup(true);
     } else {
       try {
-        setIsVotesLoading(true);
-        await axios.post("/api/vote", { feedbackId: _id }).then(async()=>{
-          await onVotesChange();
-          setIsVotesLoading(false);
+        axios.post("/api/vote", { feedbackId: _id }).then(() => {
+          onVotesChange();
         });
-        
       } catch (err) {
         alert("Vote failed:", err);
       }
@@ -44,6 +40,8 @@ export default function Feedbackitem({
     ev.preventDefault();
     await signIn("google");
   }
+
+  const iVoted = !!votes.find((v) => v.userEmail === session?.user?.email);
 
   return (
     <a
@@ -68,22 +66,10 @@ export default function Feedbackitem({
             </div>
           </Popup>
         )}
-        <button
-          onClick={handleVoteButtonClick}
-          className="shadow-sm shadow-gray-200 border rounded-md py-1 px-4 flex items-center gap-1 text-gray-600"
-        >
-          {!isVotesLoading &&(
-            <>
-             <span className="triangle-up"></span>
-             {votes?.length || "0"}
-            </>
-          )}
-         {isVotesLoading&&(
-          <>
-          Loading...
-          </>
-         )}
-        </button>
+        <Button primary={iVoted} onClick={handleVoteButtonClick} className="shadow-sm border">
+          <span className="triangle-up"></span>
+          {votes?.length || "0"}
+        </Button>
       </div>
     </a>
   );

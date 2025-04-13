@@ -16,7 +16,7 @@ export default function FeedbackItemPopupComments(){
                 <textarea className="border rounded-md w-full p-2" placeholder="Add Comments" value={commentText} onChange={e=>setCommentText(e.target.value)}></textarea>
                 <div className="flex justify-end gap-2 mt-2">
                     <Button>Attach files</Button>
-                    <Button primary="true" disabled={commentText===''}>Comment</Button>
+                    <Button primary disabled={commentText===''}>Comment</Button>
 
                 </div>
             </form>
