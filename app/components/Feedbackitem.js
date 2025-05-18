@@ -13,6 +13,7 @@ export default function Feedbackitem({
   votes,
   feedbackId,
   onVotesChange,
+  image,
 }) {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const { data: session } = useSession();

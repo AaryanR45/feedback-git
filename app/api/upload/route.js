@@ -43,7 +43,7 @@ export async function DELETE(req) {
   }
 
   // Ensure only files inside /public/uploads can be deleted
-  const fullPath = path.join(process.cwd(), "public", imagePath);
+  const fullPath = path.join(process.cwd(), "public", imagePath.replace(/^\/+/, ""));
 
   try {
     if (fs.existsSync(fullPath)) {

@@ -3,6 +3,7 @@ import Popup from "@/app/components/Popup";
 import axios from "axios";
 import Trash from "./icons/Trash";
 import { useState, useRef } from "react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function FeedbackFormPopup({ setShow,onCreate }) {
   const [title, setTitle] = useState("");
@@ -10,6 +11,7 @@ export default function FeedbackFormPopup({ setShow,onCreate }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePath, setImagePath] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const{data:session}=useSession();
 
   const handleImageChange = (e) => {
     setSelectedImage(e.target.files[0]);
@@ -38,24 +40,34 @@ export default function FeedbackFormPopup({ setShow,onCreate }) {
   };
 
   const handleCreatePostButtonClick = async (ev) => {
-    ev.preventDefault();
-    if (!title || !description) {
-      alert("Title and description are required!");
-      return;
-    }
+  ev.preventDefault();
+  if (!title || !description) {
+    alert("Title and description are required!");
+    return;
+  }
 
-    try {
-      const res = await axios.post("/api/feedback", {
-        title,
-        description,
-        image: imagePath,
-      });
-      setShow(false);
-      onCreate();
-    } catch (err) {
-      alert("Failed to upload image. Please try again.");
-    }
-  };
+  if (!session) {
+    // Save post data to localStorage and redirect to login
+    localStorage.setItem(
+      'post_after_login',
+      JSON.stringify({ title, description, image: imagePath })
+    );
+    await signIn('google');
+    return; // Exit early so no further code runs
+  }
+
+  try {
+    const res = await axios.post("/api/feedback", {
+      title,
+      description,
+      image: imagePath,
+    });
+    setShow(false);
+    onCreate();
+  } catch (err) {
+    alert("Failed to create feedback. Please try again.");
+  }
+};
 
   const fileInputRef = useRef(null);
   const removeUpload = async (ev, link) => {
@@ -130,7 +142,7 @@ export default function FeedbackFormPopup({ setShow,onCreate }) {
             type="submit"
             className="mb-4 px-4 py-2 bg-blue-500 rounded text-sm"
           >
-            Create post
+            {session ? 'Create post':'Login and post'}
           </Button>
         </div>
       </form>
