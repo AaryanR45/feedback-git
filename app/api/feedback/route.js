@@ -89,3 +89,24 @@ export async function GET(req) {
     );
   }
 }
+
+export async function DELETE(request) {
+  await connectToDatabase();
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
+
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  const feedback = await Feedback.findOne({ _id: id, userEmail: session.user.email });
+  if (!feedback) {
+    return Response.json({ success: false, error: "Not found or unauthorized" }, { status: 404 });
+  }
+
+  await Feedback.deleteOne({ _id: id });
+
+  return Response.json({ success: true });
+}
+

@@ -199,6 +199,11 @@ export default function Board() {
     return votesData.filter((vote) => vote.feedbackId === feedbackId);
   };
 
+  function handleDeleteFeedback(id: string) {
+  setFeedbacks((prev) => prev.filter((item) => item._id !== id));
+}
+
+
   return (
     <main className="bg-white max-w-4xl mx-auto shadow-lg rounded-lg mt-4 mb-8 overflow-hidden">
       <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-8">
@@ -266,7 +271,7 @@ export default function Board() {
             onOpen={() => openFeedbackPopupItem(feedback)}
             onVotesChange={fetchVotes}
             image={feedback.image}
-            feedbackId={undefined}
+            onDelete={handleDeleteFeedback}
           />
         ))}
         {(loading || waiting) && (
