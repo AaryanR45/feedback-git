@@ -4,6 +4,7 @@ import Popup from "./Popup";
 import Button from "./Button";
 import { signIn, useSession } from "next-auth/react";
 import axios from "axios";
+import Trash from "./icons/Trash";
 
 export default function Feedbackitem({
   onOpen,
@@ -88,7 +89,7 @@ export default function Feedbackitem({
         </Button>
         {session?.user?.email && (
           <Button onClick={handleDelete} className="bg-red-500 text-white">
-            Delete
+            <Trash/>
           </Button>
         )}
       </div>
